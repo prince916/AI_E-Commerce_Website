@@ -25,3 +25,5 @@ app.use(
     useTempFiles: true,
   })
 );
+
+export default app;
