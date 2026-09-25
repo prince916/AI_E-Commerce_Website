@@ -1,165 +1,162 @@
 # AI E-Commerce Project Context
 
-## 1. Project Overview
-This repository is a backend-focused e-commerce web application project named "AI_E-Commerce_Website". At the current stage, the codebase is a minimal backend bootstrap rather than a complete product implementation.
+## 1. Project overview
+This repository is a lightweight AI e-commerce prototype built with a React frontend and a Node.js/Express backend. It is not yet a full production e-commerce platform, but it already includes a working demo flow for backend health checks, registration, login, and Cloudinary image upload.
 
-The project appears to be designed for:
-- user authentication and authorization
-- product and order management
-- payment processing with Stripe
-- email notifications
-- cloud image uploads via Cloudinary
-- dashboard and frontend integration
+The project is designed around a simple architecture:
+- a customer-facing frontend for testing API interaction
+- a backend API for auth and media upload logic
+- environment-based configuration for external services
+- a future-ready structure for ecommerce features such as products, payments, and admin flows
 
-## 2. Repository Structure
+## 2. Repository structure
 
 ```text
 AI_E-Commerce/
 ├── README.md
+├── context.md
+├── test-image.png
+├── client/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   └── src/
+│       ├── App.jsx
+│       ├── main.jsx
+│       └── styles.css
 ├── server/
 │   ├── app.js
 │   ├── server.js
 │   ├── package.json
-│   ├── package-lock.json
 │   └── config/
 │       └── config.env
 └── .git/
 ```
 
-## 3. Tech Stack
-The server uses the following main technologies:
+## 3. Frontend architecture
+The frontend is a Vite + React application in the client folder.
 
-- Runtime: Node.js
-- Framework: Express.js
-- Language: JavaScript (ES modules via `"type": "module"`)
-- Database client: PostgreSQL driver (`pg`)
-- Authentication: JWT + bcrypt
-- File uploads: `express-fileupload`
-- Email: Nodemailer
-- Payments: Stripe
-- Media storage: Cloudinary
-- Config: dotenv
-- CORS: cors
-- Cookies: cookie-parser
+### Main frontend files
+- client/package.json: Vite React app setup
+- client/src/main.jsx: React root mount
+- client/src/App.jsx: dashboard-like UI for backend interaction
+- client/src/styles.css: all custom styling for the demo interface
 
-## 4. Package Dependencies
-From `server/package.json`:
+### Frontend behavior
+The React app, defined in App.jsx, provides these demo interactions:
+- Check backend health by calling GET /
+- Register a user by calling POST /api/register
+- Login a user by calling POST /api/login
+- Upload an image by calling POST /api/upload with multipart form data
 
-```json
-{
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cloudinary": "^2.10.0",
-    "cookie-parser": "^4.7",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "express-fileupload": "^1.5.2",
-    "jsonwebtoken": "^9.0.3",
-    "nodemailer": "^9.0.1",
-    "pg": "^8.22.0",
-    "stripe": "^22.3.0"
-  }
-}
-```
+The app runs against the backend at http://localhost:4000 and displays HTTP responses in console-style panels.
 
-## 5. App Bootstrap and Middleware
-The file [server/app.js](server/app.js) creates the Express app and applies the core middleware:
+## 4. Backend architecture
+The backend is an Express application in the server folder.
 
-- CORS configuration with allowed origins from `FRONTEND_URL` and `DASHBOARD_URL`
-- Cookie parsing
-- JSON body parsing
-- URL-encoded body parsing
-- Temporary file upload middleware using `express-fileupload`
+### Main backend files
+- server/app.js: Express app configuration and API routes
+- server/server.js: server bootstrapping and Cloudinary initialization
+- server/config/config.env: environment configuration
 
-Important code behavior:
+### Middleware and setup
+The app configures:
+- CORS with FRONTEND_URL and DASHBOARD_URL
+- cookie parsing
+- JSON parsing
+- URL-encoded request parsing
+- `express-fileupload` for temporary file handling
 
-```js
-app.use(cors({
-  origin: [process.env.FRONTEND_URL, process.env.DASHBOARD_URL],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-}));
-```
+### API routes currently implemented
+- GET /: returns a basic health/status response
+- POST /api/register: validates user data, checks duplicates, hashes password with bcrypt, stores user in memory
+- POST /api/login: validates credentials, compares password hash, issues JWT, sets cookie
+- POST /api/upload: accepts an image file, uploads to Cloudinary, deletes temp file, returns secure URL
 
-This indicates the backend expects both a frontend site and a dashboard/admin client to connect to it.
+### Important observation
+The user data layer is intentionally in-memory. There is a `users` array inside server/app.js and no persistent database or ORM setup yet.
 
-## 6. Server Startup
-The file [server/server.js](server/server.js) starts the HTTP server and configures Cloudinary:
+## 5. Technology stack
+### Frontend
+- React 18
+- Vite 5
+- JavaScript (ES modules)
 
-```js
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLIENT_NAME,
-  api_key: process.env.CLOUDINARY_CLIENT_API,
-  api_secret: process.env.CLOUDINARY_CLIENT_SECRET,
-});
+### Backend
+- Node.js
+- Express 5
+- dotenv
+- CORS
+- cookie-parser
+- express-fileupload
+- bcrypt
+- jsonwebtoken
+- Cloudinary SDK
+- PostgreSQL driver (`pg`) is present, but not yet connected or wired into business logic
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
-});
-```
+### External service configuration present
+The project is prepared for integration with:
+- Cloudinary for image uploads
+- JWT-based auth
+- Nodemailer for email delivery
+- Stripe for payment processing
+- Gemini API key for AI features
 
-This confirms the backend is currently a bootstrapped server only; API routes, database models, controllers, and business logic are not present yet.
+These are configured in server/config/config.env, but actual implementation flow is not complete in the codebase.
 
-## 7. Environment Configuration
-The environment file [server/config/config.env](server/config/config.env) contains runtime values such as:
-
-- server port: 4000
-- frontend/dashboard URLs
-- JWT settings
-- SMTP configuration for Gmail
-- Gemini API key
-- Cloudinary credentials
-- Stripe keys and webhook secret
-
-This strongly suggests the project is intended to support:
-- AI-based features (Gemini API)
-- payment flows and webhooks
-- email delivery
-- media uploads
-- secure JWT auth
-
-## 8. Current Codebase Status
-As of this review, the repository is still in an early scaffolding stage. It contains:
-
-- basic Express app setup
-- environment variables
-- Cloudinary initialization
-- package dependencies for a full-stack e-commerce backend
-
-Missing from the current codebase:
-- route definitions
-- controller files
-- model/database layer
+## 6. Data model and persistence
+At the current stage, the application does not include:
 - database connection logic
-- auth routes
-- product/order/payment endpoints
-- frontend web app
-- tests
+- schema definitions
+- migrations
+- models for users, products, carts, orders, or reviews
+- repository/service layer for business operations
 
-## 9. Architectural Interpretation
-The architecture appears to be designed as a Node/Express REST API that serves both:
+The only real persistence is the in-memory `users` array used for sign-up and sign-in testing.
 
-1. a customer-facing frontend
-2. an admin/dashboard frontend
+## 7. Current project status
+This codebase is best described as a working prototype / starter project rather than a completed ecommerce application.
 
-Key integration points include:
-- frontend URLs in CORS
-- JWT-based authentication
-- Cloudinary for assets
-- Stripe for checkout/payment events
-- SMTP for notifications
-- PostgreSQL for persistent data storage
+### What works
+- Backend starts and responds on the configured port
+- Register route accepts and hashes user data
+- Login route verifies credentials and returns JWT
+- Image upload route sends file to Cloudinary
+- Frontend can exercise these endpoints manually from the browser
 
-## 10. Developer Notes
-This project likely started as a backend foundation for an AI-powered e-commerce site and will need additional modules such as:
+### What is still missing
+- product catalog and inventory management
+- cart and checkout flow
+- Stripe payment integration logic and webhooks
+- order and payment persistence
+- database-backed authentication and authorization rules
+- admin dashboard functionality
+- comprehensive validation and error handling
+- tests and deployment setup
 
-- API versioning and route structure
-- database schema and queries
-- models for users, products, orders, reviews, carts, etc.
-- service layer for Stripe, email, and Cloudinary
-- middleware for auth, error handling, validation
-- test coverage and deployment configuration
+## 8. Environment configuration
+The server environment file includes keys for:
+- PORT
+- FRONTEND_URL
+- DASHBOARD_URL
+- JWT_EXPIRES_IN
+- COOKIE_EXPIRES_IN
+- JWT_SECRET_KEY
+- SMTP_SERVICE and Gmail SMTP values
+- GEMINI_API_KEY
+- CLOUDINARY_CLIENT_NAME, CLOUDINARY_CLIENT_API, CLOUDINARY_CLIENT_SECRET
+- STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_FRONTEND_KEY
 
-## 11. Summary
-The codebase is a backend starter for an AI-enabled e-commerce platform with Express, JWT, PostgreSQL, Stripe, Cloudinary, and email integrations. The foundation is in place, but the actual business application logic still needs to be implemented.
+These values are intended for local development and future integrations, but some secret values are placeholders or redacted in the actual file.
+
+## 9. Architectural interpretation
+The codebase currently reflects a layered prototype architecture:
+1. Frontend: React interface for testing business-critical flows
+2. API layer: Express routes in server/app.js
+3. External integrations: Cloudinary, Stripe, SMTP, Gemini configuration
+4. Security layer: bcrypt password hashing and JWT authentication
+
+The broader intended design appears to be a full-stack AI-powered ecommerce platform serving both a customer storefront and dashboard/admin interface, but the actual implementation has not progressed beyond the prototype stage.
+
+## 10. Summary
+This project is an early-stage AI e-commerce starter with a working Express API and a demo React frontend. It already demonstrates key foundations such as user registration, login, JWT cookies, and Cloudinary upload handling, but it does not yet include the full business logic, database layer, or real ecommerce features needed for a production-ready marketplace.
